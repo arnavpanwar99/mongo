@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const { mongoose } = require('./db/mongoose');
-const { Todo } = require('./models/todo');
+const { Todo, saveTodo } = require('./models/todo');
 const  { User } = require('./models/user');
 
 const app = express();
@@ -32,17 +32,17 @@ app.listen('3000', () => console.log('started on port 3000'));
 //     }
 // }
 
-const saveTodo = async (todoObject, res) => {
-    try {
-        const newTodo = new Todo(todoObject);
-        const response = await newTodo.save();
-        res.send(response);
-        mongoose.disconnect();
-    } catch (error) {
-        res.status(400).send(error);
-        mongoose.disconnect();
-    } 
-}
+// const saveTodo = async (todoObject, res) => {
+//     try {
+//         const newTodo = new Todo(todoObject);
+//         const response = await newTodo.save();
+//         res.send(response);
+//         mongoose.disconnect();
+//     } catch (error) {
+//         res.status(400).send(error);
+//         mongoose.disconnect();
+//     } 
+// }
 
 // // saveTodo({
 // //     text: 'its a todo as well',
@@ -62,3 +62,7 @@ const saveTodo = async (todoObject, res) => {
 // // }).catch((err) => {
 // //     console.log(`the error is: ${err}`);
 // // });
+
+module.exports = {
+    app,
+}

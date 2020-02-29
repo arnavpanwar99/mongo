@@ -17,6 +17,19 @@ const Todo = mongoose.model('Todo', {
     }
 });
 
+const saveTodo = async (todoObject, res) => {
+    try {
+        const newTodo = new Todo(todoObject);
+        const response = await newTodo.save();
+        res.send(response);
+        // Mongoose.disconnect();
+    } catch (error) {
+        res.status(400).send(error);
+        // Mongoose.disconnect();
+    } 
+}
+
 module.exports = {
-    Todo
+    Todo,
+    saveTodo,
 }
