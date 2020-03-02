@@ -7,6 +7,7 @@ const configObject = {
 
 mongoose.connect('mongodb://localhost:27017/TodoApp', configObject);
 
+const Mongoose = mongoose;
 
 module.exports = {
     mongoose,

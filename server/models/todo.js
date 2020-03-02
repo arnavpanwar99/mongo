@@ -29,7 +29,30 @@ const saveTodo = async (todoObject, res) => {
     } 
 }
 
+const getAll = async (res) => {
+    try {
+        const response = await Todo.find();
+        res.send({todos: response})
+    } catch (error) {
+        res.status(400).send(error);
+    }
+} 
+
+const getById = async (id, res) => {
+    try {
+        const todo = await Todo.findById(id);
+        if(!todo){
+            return res.status(404).send();
+        }
+        res.send({todo})
+    } catch (error) {
+        res.send(400).send(error);
+    }
+}
+
 module.exports = {
     Todo,
     saveTodo,
+    getAll,
+    getById,
 }
