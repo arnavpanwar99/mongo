@@ -5,9 +5,11 @@ const configObject = {
     useUnifiedTopology: true,
 }
 
-mongoose.connect('mongodb://localhost:27017/TodoApp', configObject);
+const URL = 'mongodb+srv://arnav:arnavozil@cluster0-laaif.mongodb.net/test?retryWrites=true&w=majority';
 
-const Mongoose = mongoose;
+const URI = 'mongodb://localhost:27017/TodoApp';
+
+mongoose.connect(URL, configObject).then(() => console.log('connected'))
 
 module.exports = {
     mongoose,

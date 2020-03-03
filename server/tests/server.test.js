@@ -40,8 +40,8 @@ describe('POST/todos', () => {
                 Todo.find({text}).then((todos) => {
                     expect(todos.length).toBe(1);
                     expect(todos[0].text).toBe(text);
+                    done()
                 }).catch((err) => done(err));
-                done()
             })
     })
     
