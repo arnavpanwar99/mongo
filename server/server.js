@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const { ObjectID } = require('mongodb');
 
 const { mongoose } = require('./db/mongoose');
-const { Todo, saveTodo, getAll, getById } = require('./models/todo');
+const { Todo, saveTodo, getAll, getById, deleteById } = require('./models/todo');
 const  { User } = require('./models/user');
 
 const app = express();
@@ -31,6 +31,16 @@ app.get('/todos/:id', (req, res) => {
     }
 
     getById(id, res);
+})
+
+app.delete('/todos/:id', (req,res) => {
+    const { id } = req.params;
+
+    if(!ObjectID.isValid(id)){
+        return res.status(404).send();
+    }
+
+    deleteById(id, res);
 })
 
 app.listen(port, () => console.log(`started on port ${port}`));

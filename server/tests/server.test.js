@@ -102,3 +102,30 @@ describe('GET /todos/:id', () => {
             .end(done);
     })
 })
+
+describe('DELETE/todos/:id', () => {
+    it('should delete correct todo with specific id', (done) => {
+        request(app)
+            .delete(`/todos/${_id.toHexString()}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.text).toBe('first');
+                expect(res.body.deleted).toBe(true);
+            })
+            .end(done);
+    })
+
+    it('should not delete todo for invalid ObjectID', (done) => {
+        request(app)
+            .delete('/todos/asdae333ert3')
+            .expect(404)
+            .end(done);
+    })
+
+    it('should not delete todo for incorrect ObjectID',(done) => {
+        request(app)
+            .delete(`/todos/${new ObjectID().toHexString()}`)
+            .expect(404)
+            .end(done);
+    })
+})
