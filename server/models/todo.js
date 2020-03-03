@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const mongoose = require('mongoose');
 
 const Todo = mongoose.model('Todo', {
@@ -46,11 +47,11 @@ const getById = async (id, res) => {
         }
         res.send({todo})
     } catch (error) {
-        res.send(400).send(error);
+        res.status(400).send(error);
     }
 }
 
-deleteById = async (id, res) => {
+const deleteById = async (id, res) => {
     try {
         const todo = await Todo.findByIdAndDelete(id);
         if(!todo){
@@ -58,7 +59,33 @@ deleteById = async (id, res) => {
         }
         res.send({todo, deleted: true});
     } catch (error) {
-        res.send(400).send(error);
+        res.status(400).send(error);
+    }
+}
+
+const updateTodo = async (id, body, res) => {
+    const { text = '', completed = false } = body;
+    if(_.isBoolean(completed) && completed === true){
+        body.completedAt = new Date().getTime();
+    }else{
+        body.completedAt = null;
+        body.completed = false;
+    }
+
+    try {
+        const todo = await Todo.findByIdAndUpdate(id, {
+            $set: body
+        }, {
+            new: true
+        });
+
+        if(!todo){
+            return res.status(404).send();
+        }
+
+        res.send({todo});
+    } catch (error) {
+        res.status(400).send();
     }
 }
 
@@ -67,5 +94,6 @@ module.exports = {
     saveTodo,
     getAll,
     getById,
-    deleteById
+    deleteById,
+    updateTodo,
 }

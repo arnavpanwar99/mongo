@@ -112,7 +112,18 @@ describe('DELETE/todos/:id', () => {
                 expect(res.body.todo.text).toBe('first');
                 expect(res.body.deleted).toBe(true);
             })
-            .end(done);
+            .end((err, res) => {
+                if(err){
+                    return done(err);
+                }
+
+                Todo.findById(_id).then((todo) => {
+                    expect(todo).toBeNull();
+                    done();
+                }).catch((err) => {
+                    done(err);
+                })
+            });
     })
 
     it('should not delete todo for invalid ObjectID', (done) => {
