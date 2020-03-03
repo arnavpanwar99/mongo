@@ -9,7 +9,12 @@ const URL = 'mongodb+srv://arnav:arnavozil@cluster0-laaif.mongodb.net/test?retry
 
 const URI = 'mongodb://localhost:27017/TodoApp';
 
-mongoose.connect(URL, configObject).then(() => console.log('connected'))
+const final = process.env.PORT ? URL : URI;
+
+mongoose.connect(final, configObject).then(() => {
+    console.log('connected')
+    mongoose.set('useFindAndModify', false);
+})
 .catch((err) => console.log('there is some error'));
 
 module.exports = {
