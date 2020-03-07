@@ -5,19 +5,21 @@ const { ObjectID } = require('mongodb');
 
 const { mongoose } = require('./db/mongoose');
 const { Todo, saveTodo, getAll, getById, deleteById, updateTodo } = require('./models/todo');
-const  { User } = require('./models/user');
+const  { User, saveUser } = require('./models/user');
 
 const app = express();
 
 const port = process.env.PORT || 3000;
-
 app.use(bodyParser.json());
 
 app.post('/todos', (req, res) => {
-    saveTodo({
-        text: req.body.text,
-        completed: req.body.completed
-    }, res);
+    const body = _.pick(req.body, ['text']);
+    saveTodo(body, res);
+})
+
+app.post('/users', (req, res) => {
+    const body = _.pick(req.body, ['email', 'password']);
+    saveUser(body, res);
 })
 
 app.get('/todos', (req, res) => {

@@ -20,7 +20,7 @@ const Todo = mongoose.model('Todo', {
 
 const saveTodo = async (todoObject, res) => {
     try {
-        const newTodo = new Todo(todoObject);
+        const newTodo = await new Todo(todoObject);
         const response = await newTodo.save();
         res.send(response);
         // Mongoose.disconnect();
