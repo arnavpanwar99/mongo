@@ -1,6 +1,8 @@
 const { mongoose } = require('./../db/mongoose');
+
 const { isEmail } = require('validator');
 const { sign, verify } = require('jsonwebtoken');
+const _ = require('lodash');
 
 const UserSchema = new mongoose.Schema({
     email: {
@@ -41,9 +43,15 @@ UserSchema.methods = {
         }
         const token = sign(signObject, 'abc123').toString();
 
-        user.tokens.push({ access, token });
-        const response = await user.save();
-        return response;
+        await user.tokens.push({ access, token });
+        await user.save();
+        return token;
+    },
+
+    toJSON: function(){
+        const user = this;
+        const userObject = user.toObject();
+        return _.pick(userObject, ['_id', 'email']);
     }
 }
 
@@ -51,10 +59,10 @@ const User = mongoose.model('User', UserSchema);
 
 const saveUser = async (user, res) => {
     try {
-        const newUser = await new User(user);
+        const newUser = new User(user);
         const response = await newUser.save();
         const token = await newUser.generateAuthToken();
-        res.send(token);
+        res.header('x-auth', token).send(response);
     } catch (error) {
         res.status(400).send(error);
     }

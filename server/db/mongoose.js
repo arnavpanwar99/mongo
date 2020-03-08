@@ -13,6 +13,7 @@ const URI = 'mongodb://localhost:27017/TodoApp';
 
 const final = process.env.PORT ? URL : URI;
 
+// console.log(final);
 
 mongoose.connect(final, configObject).then(() => {
     console.log('connected')
