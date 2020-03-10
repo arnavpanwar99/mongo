@@ -1,29 +1,14 @@
+const { ObjectID } = require('mongodb');
 const request = require('supertest');
 const expect = require('expect');
-const { ObjectID } = require('mongodb');
 
+const { populateTodos, todos, _id, populateUsers, users } = require('./seed/seed');
 const { app } = require('./../server');
 const { Todo } = require('./../models/todo');
+const { User } = require('./../models/user');
 
-const _id = new ObjectID();
-
-const todos = [{
-    text: 'first',
-    completed: false,
-    _id
-} ,{    
-    text: 'second',
-    completed: true,
-    _id: new ObjectID()
-}]
-
-beforeEach('description', (done) => {
-    Todo.deleteMany({}).then(() => {
-        Todo.insertMany(todos)
-        return done();
-    })  
-})
-
+beforeEach(populateUsers);
+beforeEach(populateTodos);
 
 describe('POST/todos', () => {
     it('should create a new todo', (done) => {
@@ -194,5 +179,134 @@ describe('PATCH /todos/:id', () => {
                     done(err);
                 })
             })
+    })
+})
+
+describe('POST /users', () => {
+    it('should post users with correct data', (done) => {
+        const user = {
+            email: 'you@example.com',
+            password: '123456789',
+        }
+        request(app)
+            .post('/users')
+            .send(user)
+            .expect(200)
+            .expect((res) => {
+                expect(!!res.headers['x-auth']).toBe(true);
+                expect(!!res.body._id).toBe(true);
+                expect(!!res.body.email).toBe(true);
+            })
+            .end((err, res) => {
+                if(err){
+                    return done(err);
+                }
+                User.find({ email: 'you@example.com' }).then((users) => {
+                    expect(users.length).toBe(1);
+                    expect(users[0].email).toBe('you@example.com');
+                    done();
+                }).catch((err) => {
+                    done(err);
+                })
+            });
+    });
+
+    it('should not post user with incomplete data', (done) => {
+        request(app)
+            .post('/users')
+            .send({email: 'dads@ds.dsr'})
+            .expect(400)
+            .end(done);
+    });
+
+    it('should not create user if email already exists', (done) => {
+        request(app)
+            .post('/users')
+            .send(users[0])
+            .expect(400)
+            .end(done);
+    })
+});
+
+describe('GET /users/me', () => {
+    it('should fetch user with correct header', (done) => {
+        request(app)
+            .get('/users/me')
+            .set('x-auth', users[0].tokens[0].token)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.email).toBe(users[0].email);
+                expect(res.body._id).toBe(users[0]._id.toHexString());
+            })
+            .end(done);
+    });
+
+    it('should not fetch user with incorrect header', (done) => {
+        request(app)
+            .get('/users/me')
+            .set('x-auth', 'somerandomstring123')
+            .expect(401)
+            .expect((res) => {
+                expect(res.body.email).toBe(undefined);
+                expect(res.body._id).toBe(undefined);
+            })
+            .end(done);
+    })
+})
+
+describe('POST /login/user', () => {
+    const validUser = {
+        email: users[0].email,
+        password: users[0].password
+    }
+    const inValidUserOne = {
+        email: 'arnavpanwar99@gmail.com',
+        password: 'itdoesntmatter'
+    }
+    const inValidUserTwo = {
+        email: users[0].email,
+        password: 'againitdoesntmatter'
+    }
+    it('should login user with valid credentials', (done) => {
+        request(app)
+            .post('/users/login')
+            .send(validUser)
+            .expect(200)
+            .expect((res) => {
+                expect(!!res.headers['x-auth']).toBe(true);
+                expect(res.body.email).toBe(validUser.email);
+            })
+            .end((err, res) => {
+                if(err){
+                    return done(err);
+                }
+
+                User.findOne({email: validUser.email}).then((user) => {
+                    const { tokens } = user;
+                    const match = tokens.filter((item) => item.token===res.headers['x-auth']);
+                    expect(match[0].token).toBe(res.headers['x-auth']);
+                    done();
+                }).catch((err) => done(err));
+            });
+    })
+    it('should not login user with invalid email', (done) => {
+        request(app)
+            .post('/users/login')
+            .send(inValidUserOne)
+            .expect(404)
+            .expect((res) => {
+                expect(res.body.error).toBe('user not found');
+            })
+            .end(done);
+    })
+    it('should not login user with incorrect password', (done) => {
+        request(app)
+            .post('/users/login')
+            .send(inValidUserTwo)
+            .expect(400)
+            .expect((res) => {
+                expect(res.body.error).toBe('incorrect password');
+            })
+            .end(done);
     })
 })

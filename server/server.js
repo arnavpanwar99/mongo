@@ -3,9 +3,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { ObjectID } = require('mongodb');
 
+const { authenticate } = require('./middleware/authenticate');
 const { mongoose } = require('./db/mongoose');
 const { Todo, saveTodo, getAll, getById, deleteById, updateTodo } = require('./models/todo');
-const  { User, saveUser } = require('./models/user');
+const  { User, saveUser, loginUser, removeToken } = require('./models/user');
 
 const app = express();
 
@@ -22,6 +23,11 @@ app.post('/users', (req, res) => {
     saveUser(body, res);
 })
 
+app.post('/users/login', (req, res) => {
+    const body = _.pick(req.body, ['email', 'password']);
+    loginUser(body, res);
+})
+
 app.get('/todos', (req, res) => {
     getAll(res);
 })
@@ -36,6 +42,11 @@ app.get('/todos/:id', (req, res) => {
     getById(id, res);
 })
 
+
+app.get('/users/me', authenticate, (req, res) => {
+    res.send(req.user);
+})
+
 app.delete('/todos/:id', (req,res) => {
     const { id } = req.params;
 
@@ -44,6 +55,11 @@ app.delete('/todos/:id', (req,res) => {
     }
 
     deleteById(id, res);
+})
+
+app.delete('/users/me/token', authenticate, (req, res) => {
+    const { user, token } = req;
+    removeToken(token, user, res);
 })
 
 app.patch('/todos/:id', (req, res) => {
