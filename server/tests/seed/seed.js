@@ -7,14 +7,20 @@ const _id = new ObjectID();
 
 const userId = new ObjectID();
 
+const userIdTwo = new ObjectID();
+
+const userIdThree = new ObjectID();
+
 const todos = [{
     text: 'first',
     completed: false,
-    _id
+    _id,
+    _creator: userId
 } ,{    
     text: 'second',
     completed: true,
-    _id: new ObjectID()
+    _id: new ObjectID(),
+    _creator: userIdTwo
 }]
 
 const users = [{
@@ -26,7 +32,7 @@ const users = [{
         token: sign({ _id: userId, access: 'auth' }, 'abc123').toString()
     }]
 }, {
-    _id: new ObjectID(),
+    _id: userIdTwo,
     email: 'ram@dds.csdc',
     password: 'ramshyam'
 }]
